@@ -8,10 +8,6 @@
         "name": "bmorton.com"
       }
     ],
-    "require": {
-        "symfony/process": "^6.0"
-    },
-
     "autoload": {
         "psr-4": {
           "bgmorton\\LaravelExifStripper\\": "src"
