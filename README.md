@@ -44,3 +44,7 @@ Publish config:
 ## Notes
 
 - An error will be thrown on all but minor ExifTool errors.
+
+## Todo
+
+- Option to dump EXIF data to a text file
