@@ -43,7 +43,7 @@ class LaravelExifStripperMiddleware
                 $tempFilePath = $file->getPathName();
 
                 // Not the extension of the the temp file but of the original file name
-                $originalFileExtension = $file->getExtension();
+                $originalFileExtension = $file->guessClientExtension();
 
                 // List of file extensions supported by ExifTool by running exiftool -listwf
                 $supportedExifToolsWriteFormats = "360 3G2 3GP 3GP2 3GPP AAX AI AIT APNG ARQ ARW AVIF CIFF CR2 CR3 CRM CRW CS1 DCP DNG DR4 DVB EPS EPS2 EPS3 EPSF ERF EXIF EXV F4A F4B F4P F4V FFF FLIF GIF GPR HDP HEIC HEIF HIF ICC ICM IIQ IND INDD INDT INSP J2K JNG JP2 JPE JPEG JPF JPG JPM JPS JPX JXL JXR LRV M4A M4B M4P M4V MEF MIE MNG MOS MOV MP4 MPO MQV MRW NEF NKSC NRW ORF ORI PBM PDF PEF PGM PNG PPM PS PS2 PS3 PSB PSD PSDT QT RAF RAW RW2 RWL SR2 SRW THM TIF TIFF VRD WDP X3F XMP";
@@ -59,7 +59,7 @@ class LaravelExifStripperMiddleware
                 $commands = ["-j", "-P", "-m", "-overwrite_original", "-all=", $tempFilePath]; // would -z also be beneficial?
 
                 // The process should ONLY be run if the file type is supported.  Unsupported file types generate an error
-                if (!in_array($originalFileExtension, $supportedExifToolsWriteFormats)) {
+                if (!in_array(strtoupper($originalFileExtension), $supportedExifToolsWriteFormats)) {
                     // Skip this loop iteration as it is an unsupported file type
                     continue;
                 }
