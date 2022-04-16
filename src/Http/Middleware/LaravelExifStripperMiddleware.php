@@ -39,24 +39,21 @@ class LaravelExifStripperMiddleware
 
             foreach ($this->array_flatten($request->files->all()) as $file) {
 
+                if(!$file->isValid()){
+                    continue;
+                }
+
                 // I assume that when Laravel's file storage isn't local (ie using S3 etc) the uploaded file is still stored in the PHP temp dir after upload, so EXIF can be removed during that stage, before it is moved to it's final storage location
                 $tempFilePath = $file->getPathName();
 
-                // Not the extension of the the temp file but of the original file name
-                $originalFileExtension = $file->guessClientExtension();
-
                 // List of file extensions supported by ExifTool by running exiftool -listwf
                 $supportedExifToolsWriteFormats = "360 3G2 3GP 3GP2 3GPP AAX AI AIT APNG ARQ ARW AVIF CIFF CR2 CR3 CRM CRW CS1 DCP DNG DR4 DVB EPS EPS2 EPS3 EPSF ERF EXIF EXV F4A F4B F4P F4V FFF FLIF GIF GPR HDP HEIC HEIF HIF ICC ICM IIQ IND INDD INDT INSP J2K JNG JP2 JPE JPEG JPF JPG JPM JPS JPX JXL JXR LRV M4A M4B M4P M4V MEF MIE MNG MOS MOV MP4 MPO MQV MRW NEF NKSC NRW ORF ORI PBM PDF PEF PGM PNG PPM PS PS2 PS3 PSB PSD PSDT QT RAF RAW RW2 RWL SR2 SRW THM TIF TIFF VRD WDP X3F XMP";
-
                 // Convert to array
                 $supportedExifToolsWriteFormats = explode(" ", $supportedExifToolsWriteFormats);
 
-                // Path to ExifTool perl script - now supplied by path in config
-                // $binary = [__DIR__ . "/../../../lib/Image-ExifTool-12.39/exiftool"];
-                $binary = [$binary];
-
-                // Arguments to pass to ExifTool
-                $commands = ["-j", "-P", "-m", "-overwrite_original", "-all=", $tempFilePath]; // would -z also be beneficial?
+                // Not the extension of the the temp file but of the original file name
+                // https://github.com/symfony/symfony/blob/6.1/src/Symfony/Component/HttpFoundation/File/UploadedFile.php
+                $originalFileExtension = $file->guessExtension();
 
                 // The process should ONLY be run if the file type is supported.  Unsupported file types generate an error
                 if (!in_array(strtoupper($originalFileExtension), $supportedExifToolsWriteFormats)) {
@@ -64,6 +61,21 @@ class LaravelExifStripperMiddleware
                     continue;
                 }
 
+                // Path to ExifTool perl script - now supplied by path in config
+                // $binary = [__DIR__ . "/../../../lib/Image-ExifTool-12.39/exiftool"];
+                $binary = [$binary];
+
+                // Arguments to pass to ExifTool
+                $commands = ["-j", "-P", "-m", "-overwrite_original", "-all="]; // would -z also be beneficial?
+
+                // Preserve orientation
+                $exif = exif_read_data($tempFilePath);   
+                if (!empty($exif["Orientation"])) {
+                    $commands[] = "-orientation#=" . $exif["Orientation"];
+                }
+
+                $commands[] = $tempFilePath;
+                
                 // Run ExifTool
                 $process = new Process(array_merge($binary, $commands));
                 $process->run();
