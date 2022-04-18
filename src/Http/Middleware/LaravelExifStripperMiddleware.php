@@ -58,7 +58,8 @@ class LaravelExifStripperMiddleware
                 // The process should ONLY be run if the file type is supported.  Unsupported file types generate an error
                 if (!in_array(strtoupper($originalFileExtension), $supportedExifToolsWriteFormats)) {
                     // Skip this loop iteration as it is an unsupported file type
-                    continue;
+                    //continue;
+                    //This is disabled for now - it is unreliable
                 }
 
                 // Path to ExifTool perl script - now supplied by path in config
