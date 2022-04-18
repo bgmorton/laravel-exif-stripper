@@ -48,4 +48,3 @@ Publish config:
 ## Todo
 
 - Option to dump EXIF data to a text file
-- Figure out why file type detection is failing, and re-enable running exiftool on only compatible files
