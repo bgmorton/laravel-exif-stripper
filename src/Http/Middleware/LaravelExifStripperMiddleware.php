@@ -34,6 +34,8 @@ class LaravelExifStripperMiddleware
         // Get values from config
         $enabled = config('laravel-exif-stripper.enabled', FALSE);
         $binary = config('laravel-exif-stripper.exiftool_binary', 'exiftool');
+        // Place it in an array as array_merge() will be used later to generate the command with arguments
+        $binary = [$binary];
 
         if ($enabled) {
 
@@ -60,10 +62,6 @@ class LaravelExifStripperMiddleware
                     // Skip this loop iteration as it is an unsupported file type
                     continue;
                 }
-
-                // Path to ExifTool perl script - now supplied by path in config
-                // $binary = [__DIR__ . "/../../../lib/Image-ExifTool-12.39/exiftool"];
-                $binary = [$binary];
 
                 // Arguments to pass to ExifTool
                 $commands = ["-j", "-P", "-m", "-overwrite_original", "-all="]; // would -z also be beneficial?
